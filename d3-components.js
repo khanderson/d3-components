@@ -38,8 +38,7 @@ var d3c = {
         .append("g")
         .attr("clip-path", "url(#" + clip_path_id + ")"),
         y_scale = options.y_scale,
-        x_scale = d3.scale.linear()
-        .rangeRound([0, width]),
+        x_scale = options.x_scale || d3.scale.linear().rangeRound([0, width]),
         y_axis_g = chart_g.append("g")
         .attr("class", "y-generic-time axis"),
         x_axis_g = svg.append("g")
