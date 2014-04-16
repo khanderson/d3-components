@@ -1,4 +1,23 @@
 var d3c = {
+  Group: function(components) {
+    var components = components === undefined ? [] : components;
+    
+    return {
+      add_component: function(component) {
+        components.push(component);
+      },
+      update_all: function(all_data) {
+        components.forEach(function(component) { 
+          component.update_all(all_data);
+        });
+      },
+      update_positions: function(all_data) {
+        components.forEach(function(component) { 
+          component.update_positions(all_data);
+        });
+      }
+    };
+  },
   StackedHorizontalBarChart: function(svg, options) {  
     var x_offset = options.x_offset || 0,
         y_offset = options.y_offset || 0,
