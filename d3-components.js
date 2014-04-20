@@ -27,7 +27,8 @@ var d3c = {
         data_extractor = options.data_extractor || function(all_data) { return all_data; },
         field_extractor = options.field_extractor || function(datum) { return datum; },
         category_axis_options = $.extend({ show: true, orient: 'left', labels: 'inside' }, options.category_axis_options || {}),
-        value_axis_options = $.extend({ show: true, orient: 'bottom' }, options.value_axis_options || {});
+        value_axis_options = $.extend({ show: true, orient: 'bottom' }, options.value_axis_options || {}),
+        bar_scale_factor = options.bar_scale || 1.0;
       
     var clip_path_id = class_name + '-clip',
         chart_g = svg
@@ -73,7 +74,8 @@ var d3c = {
   
     var update_all = function(all_data) {
       var data = options.data_extractor(all_data),
-          bar_height = y_scale.rangeBand();
+          unscaled_bar_width = y_scale.rangeBand(),
+          scaled_bar_width = unscaled_bar_width * bar_scale_factor;
 
       x_scale.domain([0, d3.max(data, function(d) { return d3.sum(options.category_scale.domain(), function(category) { return d.values[category] ? options.field_extractor(d.values[category]) : 0; }); }) ]);
 
@@ -84,7 +86,7 @@ var d3c = {
       var stacks_entry_g = stacks.enter()
           .append("g")
           .attr("class", "stacks")
-          .attr("transform", function(d) { return "translate(0," + (y_scale(options.get_identifier(d))) + ")"; });
+          .attr("transform", function(d) { return "translate(0," + (y_scale(options.get_identifier(d)) + (unscaled_bar_width - scaled_bar_width)/2) + ")"; });
 
       stacks.exit()
           .remove();
@@ -113,7 +115,7 @@ var d3c = {
       bars.enter()
           .append("rect")
           .attr("class", "bar")
-          .attr("height", bar_height)
+          .attr("height", scaled_bar_width)
           .attr("x", function(d) { return x_scale(d.x0); })
           .attr("width", 0)
           .style("fill", function(d) { return options.category_scale(d.category); })
@@ -139,7 +141,7 @@ var d3c = {
       
         stacks_entry_g.append('text')
         .attr("x", x_scale(0) + label_x_offset)
-        .attr("y", function(d) { return bar_height * label_y_factor; })
+        .attr("y", function(d) { return scaled_bar_width * label_y_factor; })
         .attr("dy", ".35em")
         .style('text-anchor', 'beginning')
         .attr('fill', 'white')
