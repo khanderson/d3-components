@@ -18,23 +18,27 @@ var d3c = {
       }
     };
   },
-  StackedHorizontalBarChart: function(svg, options) {  
-    var x_offset = options.x_offset || 0,
-        y_offset = options.y_offset || 0,
-        height = options.height || 120,
-        width = options.width || 200,
-        class_name = options.class_name || 'stacked-horizontal-bar',
-        data_extractor = options.data_extractor || function(all_data) { return all_data; },
-        field_extractor = options.field_extractor || function(datum) { return datum; },
-        category_axis_options = $.extend({ show: true, orient: 'left', labels: 'inside' }, options.category_axis_options || {}),
-        value_axis_options = $.extend({ show: true, orient: 'bottom' }, options.value_axis_options || {}),
-        bar_scale_factor = options.bar_scale || 1.0;
-      
-    var clip_path_id = class_name + '-clip',
+  StackedHorizontalBarChart: function(svg, options) {
+    var defaults = {
+          x_offset: 0,
+          y_offset: 0,
+          height: 120,
+          width: 200,
+          class_name: 'stacked-horizontal-bar',
+          data_extractor: function(all_data) { return all_data; },
+          field_extractor: function(datum) { return datum; },
+          bar_scale_factor: 1.0,
+          category_axis_options: { show: true, orient: 'left', labels: 'inside' },
+          value_axis_options: { show: true, orient: 'bottom' }
+        };
+    
+    options = $.extend(true, {}, defaults, options);
+    
+    var clip_path_id = options.class_name + '-clip',
         chart_g = svg
         .append("g")
-        .attr("class", class_name + '-g')
-        .attr("transform", "translate(" + x_offset + "," + y_offset + ")"),
+        .attr("class", options.class_name + '-g')
+        .attr("transform", "translate(" + options.x_offset + "," + options.y_offset + ")"),
         chart_body_g = chart_g
         .append("g")
         .attr("clip-path", "url(#" + clip_path_id + ")"),
@@ -44,18 +48,18 @@ var d3c = {
         .attr("class", "y-generic-time axis"),
         x_axis_g = svg.append("g")
         .attr("class", "x-generic-time axis")
-        .attr("transform", "translate(" + x_offset + "," + (y_offset + height) + ")"),
+        .attr("transform", "translate(" + options.x_offset + "," + (options.y_offset + options.height) + ")"),
         y_axis = d3.svg.axis()
         .scale(y_scale)
-        .orient(category_axis_options.orient),
+        .orient(options.category_axis_options.orient),
         x_axis = d3.svg.axis()
         .scale(x_scale)
         .ticks(5)
-        .orient(value_axis_options.orient)
+        .orient(options.value_axis_options.orient)
         .tickFormat(d3.format(".2s")),
         utils = options.utils;
       
-    if (category_axis_options.labels == 'none' || category_axis_options.labels == 'inside') {
+    if (options.category_axis_options.labels == 'none' || options.category_axis_options.labels == 'inside') {
       y_axis.tickFormat(function(d, i) { return ""; });
     }
     
@@ -64,18 +68,18 @@ var d3c = {
     svg.append("clipPath")
        .attr("id", clip_path_id)
      .append("rect")
-       .attr("width", width)
-       .attr("height", height);
+       .attr("width", options.width)
+       .attr("height", options.height);
         
     var update_positions = function() {
-      if (value_axis_options.show) x_axis_g.transition().call(x_axis);
-      if (category_axis_options.show) y_axis_g.call(y_axis);
+      if (options.value_axis_options.show) x_axis_g.transition().call(x_axis);
+      if (options.category_axis_options.show) y_axis_g.call(y_axis);
     };
   
     var update_all = function(all_data) {
       var data = options.data_extractor(all_data),
           unscaled_bar_width = y_scale.rangeBand(),
-          scaled_bar_width = unscaled_bar_width * bar_scale_factor;
+          scaled_bar_width = unscaled_bar_width * options.bar_scale_factor;
 
       x_scale.domain([0, d3.max(data, function(d) { return d3.sum(options.category_scale.domain(), function(category) { return d.values[category] ? options.field_extractor(d.values[category]) : 0; }); }) ]);
 
@@ -103,7 +107,7 @@ var d3c = {
                 data: category_data,
                 y: options.get_identifier(d),
                 x0: x0,
-                x1: x0 += (category_data ? field_extractor(category_data) : 0)
+                x1: x0 += (category_data ? options.field_extractor(category_data) : 0)
               };
             });
           }, function(dd) { return dd.category });
@@ -136,7 +140,7 @@ var d3c = {
 
       bars.exit().remove();
       
-      if (category_axis_options.labels == 'inside') {
+      if (options.category_axis_options.labels == 'inside') {
         var label_y_factor = 0.5, label_x_offset = 6;
       
         stacks_entry_g.append('text')
