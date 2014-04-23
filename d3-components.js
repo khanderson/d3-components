@@ -29,7 +29,8 @@ var d3c = {
           field_extractor: function(datum) { return datum; },
           bar_scale_factor: 1.0,
           category_axis_options: { show: true, orient: 'left', labels: 'inside' },
-          value_axis_options: { show: true, orient: 'bottom' }
+          value_axis_options: { show: true, orient: 'bottom' },
+          listeners: {}
         };
     
     options = $.extend(true, {}, defaults, options);
@@ -70,7 +71,7 @@ var d3c = {
      .append("rect")
        .attr("width", options.width)
        .attr("height", options.height);
-        
+    
     var update_positions = function() {
       if (options.value_axis_options.show) x_axis_g.transition().call(x_axis);
       if (options.category_axis_options.show) y_axis_g.call(y_axis);
@@ -94,6 +95,25 @@ var d3c = {
 
       stacks.exit()
           .remove();
+
+      // Event bindings for rectangles forming the stacks.
+      var bind_events = function(target_selection) {
+        $.each(options.listeners, function(event_name, handler) {
+          target_selection.on(event_name, function(d, i) {
+            var context = {
+              segment_data: $.extend({ category: d.category, y: d.y }, d.data),
+              position: {
+                x0: x_scale(d.x0),
+                y0: y_scale(d.y),
+                width: x_scale(d.x1) - x_scale(d.x0),
+                height: scaled_bar_width
+              }
+            };
+          
+            handler(context);
+          });
+        });
+      };
 
       // RECTANGLES FORMING THE STACKS
       var bars = stacks.selectAll("rect")
@@ -123,6 +143,7 @@ var d3c = {
           .attr("x", function(d) { return x_scale(d.x0); })
           .attr("width", 0)
           .style("fill", function(d) { return options.category_scale(d.category); })
+          .call(bind_events)
          .transition()
           .attr("width", function(d) { return utils.assertNonNegative(x_scale(d.x1) - x_scale(d.x0)); });
 
