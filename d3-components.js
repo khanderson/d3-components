@@ -6,14 +6,14 @@ var d3c = {
       add_component: function(component) {
         components.push(component);
       },
-      update_all: function(all_data) {
+      update_all: function(all_data, placement) {
         components.forEach(function(component) { 
-          component.update_all(all_data);
+          component.update_all(all_data, placement);
         });
       },
-      update_positions: function(all_data) {
+      update_positions: function(all_data, placement) {
         components.forEach(function(component) { 
-          component.update_positions(all_data);
+          component.update_positions(all_data, placement);
         });
       }
     };
