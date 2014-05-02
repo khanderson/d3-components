@@ -82,7 +82,9 @@ var d3c = {
           unscaled_bar_width = y_scale.rangeBand(),
           scaled_bar_width = unscaled_bar_width * options.bar_scale_factor;
 
-      x_scale.domain([0, d3.max(data, function(d) { return d3.sum(options.category_scale.domain(), function(category) { return d.values[category] ? options.field_extractor(d.values[category]) : 0; }); }) ]);
+      if (!options.x_scale) {
+        //x_scale.domain([0, d3.max(data, function(d) { return d3.sum(options.category_scale.domain(), function(category) { return d.values[category] ? options.field_extractor(d.values[category]) : 0; }); }) ]);
+      }
 
       // STACKS
       var stacks = chart_body_g.selectAll(".stacks")
