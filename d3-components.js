@@ -168,7 +168,7 @@ var d3c = {
         .attr("x", x_scale(0) + label_x_offset)
         .attr("y", function(d) { return scaled_bar_width * label_y_factor; })
         .attr("dy", ".35em")
-        .style('text-anchor', 'beginning')
+        .style('text-anchor', 'start')
         .attr('fill', 'white')
         .style("font-size", "0.6em")
         .text(function(d) { return d.y });
