@@ -3,6 +3,11 @@ var d3c = {
     var components = components === undefined ? [] : components;
     
     return {
+      calculate_width: function(all_data) {
+        return d3.max(components, function(component) {
+          return component.calculate_width ? component.calculate_width(all_data) : 0
+        });
+      },
       add_component: function(component) {
         components.push(component);
       },
